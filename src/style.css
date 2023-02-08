@@ -1,0 +1,18 @@
+#map {
+  width: 50%;
+  height: 100%;
+  float: right; 
+}
+
+.scroll {
+  height: 100%;
+}
+body{
+  background : green; 
+  
+}
+.dropdown{
+  height: 50%; 
+ 
+  width: 600px; 
+}
