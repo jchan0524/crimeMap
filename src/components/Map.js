@@ -4,7 +4,8 @@ import {
   MarkerF,
   useJsApiLoader,
   InfoWindow,
-  InfoWindowF,
+  DirectionsService,
+  DirectionsRenderer,
 } from "@react-google-maps/api";
 import { useEffect, useState } from "react";
 import { json } from "react-router-dom";
@@ -18,6 +19,15 @@ const center = {
   lat: 39.677956,
   lng: -75.7509,
 };
+const origin = {
+  lat: 39.68363,
+  lng: -75.74546,
+};
+
+const destination = {
+  lat: 39.66671,
+  lng: -75.77605,
+};
 
 export default function Map(props) {
   const { isLoaded } = useJsApiLoader({
@@ -27,13 +37,19 @@ export default function Map(props) {
 
   const [map, setMap] = useState(null);
   const [data, setData] = useState([]);
-  const [response, setResponse] = useState(null);
-  const [error, setError] = useState(null);
   const [coors, setCoors] = useState();
   const [selectedMarker, setSelectedMarker] = useState();
   const [showInfoWindow, setShowInfoWindow] = useState(false);
-  const [token, setToken] = useState(props.token); 
-//   let t = IVBDcEovRGtzL0RhOUdrUFdjaDZuQ0E9PT9nQVdWRVFBQUFBQUFBQUNNQjNWelpYSmZhV1NVakFFeGxJYVVMZz09
+  const [token, setToken] = useState(props.token);
+  const [directions, setDirections] = React.useState(null);
+
+  const directionsCallback = React.useCallback((response) => {
+    if (response !== null) {
+      setDirections(response);
+    }
+  }, []);
+
+  //   let token = IVBDcEovRGtzL0RhOUdrUFdjaDZuQ0E9PT9nQVdWRVFBQUFBQUFBQUNNQjNWelpYSmZhV1NVakFFeGxJYVVMZz09
 
   const onLoad = React.useCallback(function callback(map) {
     const bounds = new window.google.maps.LatLngBounds(center);
@@ -47,8 +63,7 @@ export default function Map(props) {
   }, []);
 
   useEffect(() => {
-    console.log(props)
-    // if(token){
+    console.log(props);
 
     fetch(
       `https://crimemap.hopto.org/get/incidents?token=IVBDcEovRGtzL0RhOUdrUFdjaDZuQ0E9PT9nQVdWRVFBQUFBQUFBQUNNQjNWelpYSmZhV1NVakFFeGxJYVVMZz09`
@@ -56,30 +71,8 @@ export default function Map(props) {
       .then((response) => response.json())
       .then((json) => setData(json))
       .catch((error) => console.error(error));
-    }
-//   }
-  , []);
+  }, []);
 
-  //   const handleSubmit = async (event) => {
-  //     event.preventDefault();
-
-  //     try {
-  //       const res = await fetch("https://crimemap.hopto.org/login", {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({
-  //           username: "admin",
-  //           password: "admin",
-  //         }),
-  //       });
-  //       const json = await res.json();
-  //       setResponse(json);
-  //     } catch (err) {
-  //       setError(err);
-  //     }
-  //   };
   const onMarkerClick = (e) => {
     setSelectedMarker(e);
     console.log(e.description);
@@ -90,27 +83,6 @@ export default function Map(props) {
     setShowInfoWindow(false);
     console.log("false", showInfoWindow);
   };
-
-  // useEffect(()=> {
-  //   if(showInfoWindow){
-  //     <InfoWindowF
-
-  //           marker={selectedMarker}
-  //           visible={showInfoWindow}
-  //           position={{
-  //             lat: selectedMarker.latitude,
-  //             lng: selectedMarker.longitude,
-  //           }}
-  //           onCloseClick={() => setSelectedMarker(null)}
-  //         >
-
-  //         <h2>Info Box</h2>
-  //         <p>This is some information about the marker.</p>
-
-  //         </InfoWindowF>
-
-  //   }
-  // }, [showInfoWindow])
 
   useEffect(() => {
     if (data.data) {
@@ -130,11 +102,20 @@ export default function Map(props) {
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={center}
-        zoom={2}
+        zoom={12}
         onLoad={onLoad}
         onUnmount={onUnmount}
         onClick={() => onMapClicked()}
       >
+        {directions && <DirectionsRenderer directions={directions} />}
+        <DirectionsService
+          options={{
+            destination: destination,
+            origin: origin,
+            travelMode: "DRIVING",
+          }}
+          callback={directionsCallback}
+        />
         {/* Child components, such as markers, info windows, etc. */}
 
         {data.data ? (
