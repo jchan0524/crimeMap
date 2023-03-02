@@ -40,12 +40,14 @@ export default function Map(props) {
   const [coors, setCoors] = useState();
   const [selectedMarker, setSelectedMarker] = useState();
   const [showInfoWindow, setShowInfoWindow] = useState(false);
-  const [test, setTest] = useState();
+  const [test, setTest] = useState([]);
   const [token, setToken] = useState(
     "IVBDcEovRGtzL0RhOUdrUFdjaDZuQ0E9PT9nQVdWRVFBQUFBQUFBQUNNQjNWelpYSmZhV1NVakFFeGxJYVVMZz09"
   );
   const [directions, setDirections] = useState(null);
   const [num, setNum] = useState(0);
+  const [allMarkers, setAllMarkers] = useState(false);
+  const [oneMarker, setOneMarker] = useState(false);
 
   const directionsCallback = React.useCallback((response) => {
     if (response !== null) {
@@ -71,6 +73,12 @@ export default function Map(props) {
     }
     setNum(value);
   };
+  const allMarkersTrue = () => {
+    setAllMarkers(true);
+    setOneMarker(false);
+  };
+
+  
 
   useEffect(() => {
     console.log(props);
@@ -86,7 +94,7 @@ export default function Map(props) {
   const handleFilterNumberChange = () => {
     let len = data.length - num;
 
-    if (data.data) {
+    if (data) {
       fetch(
         `https://crimemap.hopto.org/get/incidents?filter=(entry_id=${num})&token=${token}`
       )
@@ -97,27 +105,17 @@ export default function Map(props) {
         })
         .catch((error) => console.error(error));
     }
-
-    return test ? (
-
-
-      <GoogleMap
-        mapContainerStyle={containerStyle}
-        center={center}
-        zoom={12}
-        onLoad={onLoad}
-        onUnmount={onUnmount}
-        onClick={() => onMapClicked()}
-      >
-        <MarkerF
-          key={test.data.entry_id}
-          onClick={() => onMarkerClick(test)}
-          position={{ lat: test.data.latitude, lng: test.data.longitude }}
-        />
-      </GoogleMap>
-      
-    ) : ("no data available")
   };
+
+  const handleMarker = () => {
+    console.log(test);
+    if (test.data) {
+      setAllMarkers(false);
+      setOneMarker(true);
+      setData([]);
+    }
+  };
+
   useEffect(() => {
     console.log("hello", test);
   }, [test]);
@@ -158,7 +156,15 @@ export default function Map(props) {
           onChange={handleNumberChange}
         />
       </div>
-      <button onClick={handleFilterNumberChange}>Get Directions</button>
+      <button onClick={allMarkersTrue}>Get all of markers</button>
+      <button
+        onClick={() => {
+          handleFilterNumberChange();
+          handleMarker();
+        }}
+      >
+        One marker
+      </button>
 
       <GoogleMap
         mapContainerStyle={containerStyle}
@@ -168,10 +174,9 @@ export default function Map(props) {
         onUnmount={onUnmount}
         onClick={() => onMapClicked()}
       >
-        
         {/* Child components, such as markers, info windows, etc. */}
 
-        {data.data ? (
+        {allMarkers ? (
           <>
             {data.data.map((marker) => {
               return (
@@ -183,6 +188,12 @@ export default function Map(props) {
               );
             })}
           </>
+        ) : oneMarker ? (
+          <MarkerF
+            key={test.data.entry_id}
+            onClick={() => onMarkerClick(test)}
+            position={{ lat: test.data.latitude, lng: test.data.longitude }}
+          />
         ) : (
           "no data avalible"
         )}

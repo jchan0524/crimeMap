@@ -1,5 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState, useCallback } from "react";
+
+import Geocode from "react-geocode";
+import OpenCageGeocode from "opencage-api-client";
 
 import {
   GoogleMap,
@@ -18,104 +21,109 @@ const center = {
   lng: -75.7509,
 };
 
+const geoKey = "ddd32b13e2414418ba775bba9396908f";
 
 export default function DirectionMap() {
   const [directions, setDirections] = useState(null);
-  const [origin, setOrigin] = useState({ lat: 39.68363, lng: -75.74546 });
+  const [loading, setLoading] = useState(null);
+  const [originInput, setOriginInput] = useState("");
+  const [destinationInput, SetDestinationInput] = useState("");
+  // const [origin, setOrigin] = useState({ lat: 39.68363, lng: -75.74546 });
+  const [origin, setOrigin] = useState(null);
+
   const [destination, setDestination] = useState({
     lat: 39.66671,
     lng: -75.77605,
   });
 
-  const directionsCallback = useCallback((response) => {
-    if (response !== null) {
-      setDirections(response);
-    }
+  useEffect(() => {
+    Geocode.setApiKey("AIzaSyB2uJKCQKkpNAJr4JBBBCwUH1CSETIEgmE");
+    OpenCageGeocode.geocode({
+      q: "Trabant university center",
+      key: geoKey,
+    }).then((response) => {
+      setOrigin(response.results[0].geometry);
+      console.log(response);
+      setLoading(false);
+    });
   }, []);
-  const handleOriginChange = (e) => {
-    
-    let value = parseFloat(e.target.value);
-    if(isNaN(value) === true){
-        value = 0; 
-    }
-    setOrigin((prevOrigin) => ({
-      ...prevOrigin,
-      [e.target.name]: value,
-    }));
-  };
-  const handleDestinationChange = (e) => {
-    let value = parseFloat(e.target.value);
-    if(isNaN(value) === true){
-        value = 0; 
-    }
-    setDestination((prevDestination) => ({
-      ...prevDestination,
-      [e.target.name]: value,
-    }));
-  };
 
-  const handleGetDirections = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setDirections(null);
+    setLoading(true);
+    const originResponse = await Geocode.fromAddress(originInput);
+    const destinationResponse = await Geocode.fromAddress(destinationInput);
+    const origin = originResponse.results[0].geometry.location;
+    const destination = destinationResponse.results[0].geometry.location;
+    console.log(destination);
+    setOrigin(origin);
+    setDestination(destination);
+    setLoading(false);
   };
 
   return (
     <LoadScript googleMapsApiKey="AIzaSyB2uJKCQKkpNAJr4JBBBCwUH1CSETIEgmE">
-
-      <form onSubmit={handleGetDirections}>
-        <div>
-          <label htmlFor="origin-lat">Origin Latitude: </label>
+      <div>
+        <form onSubmit={handleSubmit}>
+          <label> Origin: </label>
           <input
             type="text"
-            id="origin-lat"
-            name="lat"
-            value={origin.lat}
-            onChange={handleOriginChange}
+            value={originInput}
+            onChange={(e) => setOriginInput(e.target.value)}
           />
 
-          <label htmlFor="origin-lng">Origin Longitude:</label>
+          <label>Destination:</label>
           <input
             type="text"
-            id="origin-lng"
-            name="lng"
-            value={origin.lng}
-            onChange={handleOriginChange}
+            value={destinationInput}
+            onChange={(e) => SetDestinationInput(e.target.value)}
           />
-        </div>
-        <div>
-          <label htmlFor="destination-lat">Destination Latitude:</label>
-          <input
-            type="text"
-            id="destination-lat"
-            name="lat"
-            value={destination.lat}
-            onChange={handleDestinationChange}
-          />
-          <label htmlFor="destination-lng">Destination Longitude:</label>
-          <input
-            type="text"
-            id="destination-lng"
-            name="lng"
-            value={destination.lng}
-            onChange={handleDestinationChange}
-          />
-        </div>
-        <button onClick={handleGetDirections}>Get Directions</button>
-      </form>
-      <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={12}>
-        {directions && <DirectionsRenderer directions={directions} />}
-        {directions === null && (
-        <DirectionsService
-          options={{
-            destination: destination,
-            origin: origin,
-            travelMode: "DRIVING",
-          }}
-          callback={directionsCallback}
-        />
+
+          <button type="submit"> Get Directions</button>
+        </form>
+
+        {loading ? (
+          <div>Loading</div>
+        ) : (
+          <GoogleMap
+            mapContainerStyle={containerStyle}
+            center={center}
+            zoom={12}
+          >
+            {origin && destination && (
+              <DirectionsService
+                options={{
+                  destination: destination,
+                  origin: origin,
+                  travelMode: "DRIVING",
+                  provideRouteAlternatives: true,
+                }}
+                callback={(response) => {
+                  if (response !== null) {
+                    setDirections(response);
+                    console.log(response)
+                  }
+                }}
+              />
+            )}
+            
+            {directions && ( 
+              <>
+              <DirectionsRenderer
+                options={{ directions: directions, routeIndex: 0 }}
+              />
+              <DirectionsRenderer
+                options={{ directions: directions, routeIndex: 1 }}
+              />
+              <DirectionsRenderer
+              options={{ directions: directions, routeIndex: 2 }}
+              
+            />
+            </>
+            )}
+          </GoogleMap>
         )}
-
-      </GoogleMap>
+      </div>
     </LoadScript>
   );
 }
