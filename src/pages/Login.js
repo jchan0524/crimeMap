@@ -12,7 +12,7 @@ export default function Login() {
 
   function login(e) {
     e.preventDefault();
-    const url = `https://crimemap.hopto.org/login?username=${username}&password=${password}`;
+    const url = `https://api.crimemap.hopto.org/login?username=${username}&password=${password}`;
     fetch(url, {
       method: "POST",
       headers: {
