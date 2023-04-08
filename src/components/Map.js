@@ -1,3 +1,5 @@
+//Displays all of the markers and takes a user input to filter the amount of markers the user wants to see
+
 import React from "react";
 import {
   GoogleMap,
@@ -8,13 +10,14 @@ import {
   DirectionsRenderer,
 } from "@react-google-maps/api";
 import { useEffect, useState } from "react";
-import { json } from "react-router-dom";
 
+// Set container size for map
 const containerStyle = {
   width: "500px",
   height: "750px",
 };
 
+// Set initial center, origin, and destination coordinates
 const center = {
   lat: 39.677956,
   lng: -75.7509,
@@ -30,11 +33,13 @@ const destination = {
 };
 
 export default function Map(props) {
+  // Load Google Maps API
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: "AIzaSyB2uJKCQKkpNAJr4JBBBCwUH1CSETIEgmE",
   });
 
+  // Initialize state variables
   const [map, setMap] = useState(null);
   const [data, setData] = useState([]);
   const [coors, setCoors] = useState();
@@ -47,12 +52,14 @@ export default function Map(props) {
   const [directions, setDirections] = useState(null);
   const [num, setNum] = useState(0);
 
+  // Handle DirectionsService callback
   const directionsCallback = React.useCallback((response) => {
     if (response !== null) {
       setDirections(response);
     }
   }, []);
 
+   // Handle map load event
   const onLoad = React.useCallback(function callback(map) {
     const bounds = new window.google.maps.LatLngBounds(center);
     map.fitBounds(bounds);
@@ -60,10 +67,12 @@ export default function Map(props) {
     setMap(map);
   }, []);
 
+  // Handle map unload event
   const onUnmount = React.useCallback(function callback(map) {
     setMap(null);
   }, []);
 
+  // Handle number input change for filtering incidents
   const handleNumberChange = (e) => {
     let value = parseInt(e.target.value);
     if (isNaN(value) === true) {
@@ -83,6 +92,7 @@ export default function Map(props) {
       .catch((error) => console.error(error));
   }, []);
 
+  // Fetch data and filter by number of incidents
   const handleFilterNumberChange = () => {
     let len = data.length - num;
 
@@ -98,6 +108,7 @@ export default function Map(props) {
         .catch((error) => console.error(error));
     }
 
+    // Display filtered data on map
     return test ? (
 
 
@@ -122,17 +133,19 @@ export default function Map(props) {
     console.log("hello", test);
   }, [test]);
 
+  // Handle marker click event
   const onMarkerClick = (e) => {
     setSelectedMarker(e);
     console.log(e.description);
     console.log("hello", showInfoWindow);
     setShowInfoWindow(true);
   };
+  // Handle map click event
   const onMapClicked = () => {
     setShowInfoWindow(false);
     console.log("false", showInfoWindow);
   };
-
+// Set coordinate data for incidents
   useEffect(() => {
     if (data.data) {
       data.data.map((d) => {
@@ -186,6 +199,7 @@ export default function Map(props) {
         ) : (
           "no data avalible"
         )}
+        {/* Display info window when marker is clicked */}
         {showInfoWindow ? (
           <>
             <InfoWindow
