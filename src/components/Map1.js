@@ -100,7 +100,7 @@ export default function Map(props) {
 
      // fetch data from API and set it to state
     fetch(
-      `https://crimemap.hopto.org/get/incidents?token=IVBDcEovRGtzL0RhOUdrUFdjaDZuQ0E9PT9nQVdWRVFBQUFBQUFBQUNNQjNWelpYSmZhV1NVakFFeGxJYVVMZz09`
+      `https://api.crimemap.hopto.org/get/incidents?token=IVBDcEovRGtzL0RhOUdrUFdjaDZuQ0E9PT9nQVdWRVFBQUFBQUFBQUNNQjNWelpYSmZhV1NVakFFeGxJYVVMZz09`
     )
       .then((response) => response.json())
       .then((json) => setData(json))
@@ -113,7 +113,7 @@ export default function Map(props) {
     if (data) {
       // fetch filtered data from API and set it to state
       fetch(
-        `https://crimemap.hopto.org/get/incidents?filter=(entry_id=${num})&token=${token}`
+        `https://api.crimemap.hopto.org/get/incidents?filter=(entry_id=${num})&token=${token}`
       )
         .then((response) => response.json())
         .then((json) => {
