@@ -94,7 +94,7 @@ export default function DirectionMap() {
 // Render the component
   return (
     // Load the Google Maps API with the provided API key
-    <LoadScript googleMapsApiKey="AIzaSyB2uJKCQKkpNAJr4JBBBCwUH1CSETIEgmE">
+    <LoadScript googleMapsApiKey="AIzaSyCB4V63QJ8uz0HDmMrr_KUkuz85VcbZEZU">
       <div>
         {/* Render a form to input origin and destination locations */}
         <form onSubmit={handleSubmit}>

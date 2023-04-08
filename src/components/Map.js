@@ -36,7 +36,7 @@ export default function Map(props) {
   // Load Google Maps API
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
-    googleMapsApiKey: "AIzaSyB2uJKCQKkpNAJr4JBBBCwUH1CSETIEgmE",
+    googleMapsApiKey: "AIzaSyCB4V63QJ8uz0HDmMrr_KUkuz85VcbZEZU",
   });
 
   // Initialize state variables
