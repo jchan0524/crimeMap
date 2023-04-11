@@ -49,7 +49,7 @@ export default function DirectionMap() {
   // Set up the useEffect hook to run once when the component mounts
   useEffect(() => {
     // Set the API key for the Geocode library
-    Geocode.setApiKey("AIzaSyB2uJKCQKkpNAJr4JBBBCwUH1CSETIEgmE");
+    Geocode.setApiKey("AIzaSyCB4V63QJ8uz0HDmMrr_KUkuz85VcbZEZU");
     // Geocode a default origin location using the OpenCageGeocode API
     OpenCageGeocode.geocode({
       q: "Trabant university center",
