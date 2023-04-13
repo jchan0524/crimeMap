@@ -26,26 +26,31 @@ const center = {
 // Define a constant variable for the OpenCageGeocode API key
 const geoKey = "ddd32b13e2414418ba775bba9396908f";
 
-
 // Define the main component as a default export
 export default function DirectionMap() {
-   // Define several state variables using the useState hook
+  // Define several state variables using the useState hook
   const [directions, setDirections] = useState(null);
   const [loading, setLoading] = useState(null);
   const [originInput, setOriginInput] = useState("");
   const [destinationInput, SetDestinationInput] = useState("");
   const [origin, setOrigin] = useState(null);
   const [buttonPushed, setButtonPushed] = useState(false);
-  const [start, setStart] = useState({});
+  const [start, setStart] = useState([]);
   const [end, setEnd] = useState({});
+
+  const [lat, setLat] = useState();
+  const [long, setLong] = useState();
+  const [lat2, setLat2] = useState();
+  const [long2, setLong2] = useState();
+
+  const [token, setToken] = useState(
+    "IVBDcEovRGtzL0RhOUdrUFdjaDZuQ0E9PT9nQVdWRVFBQUFBQUFBQUNNQjNWelpYSmZhV1NVakFFeGxJYVVMZz09"
+  );
 
   const [destination, setDestination] = useState({
     lat: 39.66671,
     lng: -75.77605,
   });
-
-
-
   // Set up the useEffect hook to run once when the component mounts
   useEffect(() => {
     // Set the API key for the Geocode library
@@ -57,41 +62,118 @@ export default function DirectionMap() {
     }).then((response) => {
       // Set the origin state variable based on the geocode response
       setOrigin(response.results[0].geometry);
-      console.log(response);
+
       setLoading(false);
     });
   }, []);
 
-   // Define a function to handle form submission
+  // Define a function to handle form submission
   const handleSubmit = async (e) => {
-     // Prevent the default form submission behavior
+    // Prevent the default form submission behavior
     e.preventDefault();
     // Set the loading state variable to true
     setLoading(true);
-     // Set the buttonPushed state variable to true
+    // Set the buttonPushed state variable to true
     setButtonPushed(true);
     // Geocode the origin and destination locations using the Geocode library
     const originResponse = await Geocode.fromAddress(originInput);
     const destinationResponse = await Geocode.fromAddress(destinationInput);
-     // Extract the latitude and longitude coordinates from the geocode responses
+    // Extract the latitude and longitude coordinates from the geocode responses
     const origin = originResponse.results[0].geometry.location;
     const destination = destinationResponse.results[0].geometry.location;
-    console.log(destination);
-     // Set the origin and destination state variables based on the geocode responses
+
+    // Set the origin and destination state variables based on the geocode responses
     setOrigin(origin);
     setDestination(destination);
     // Set the loading state variable to false
     setLoading(false);
   };
 
+  const calculateSteps = (i) => {
+    console.log(i);
+    const tmpMap = i.routes[0].overview_path.map((d, index) => {
+      // if (i.routes[0].overview_path.length === index + 1) {
+      //   return;
+      // } else {
+        return d;
+        // setEnd({
+        //   lat: d[index + 1].lat(),
+        //   lng: d[index + 1].lng(),
+        // });
+        console.log("starter", d.lng());
+        // console.log('starter',start);
+        //   setStart({
+        //     lat: d.lat(),
+        //     lng: d[index].lng(),
+        // });
+        console.log("starter", start);
+        console.log("ender", end);
+        // console.log('jaf;jf;da', start)
+      // }
+    });
+
+
+    const stepsArray = [];
+
+          i.routes[0].legs.forEach((leg) => {
+            leg.steps.forEach((step) => {
+              const polyline = step.path;
+              polyline.forEach((point) => {
+                stepsArray.push({ lat: point.lat(), lng: point.lng() });
+              });
+            });
+          }); 
+
+console.log('gjgjg', stepsArray);
+
+    
+
+
+    setStart(...tmpMap)
+    console.log(tmpMap);
+
+    console.log(tmpMap[0].lat());
+    console.log(tmpMap[0].lng());
+    console.log(tmpMap[5].lat());
+    console.log(tmpMap[5].lng());
+    console.log(tmpMap.length)
+    console.log(start)
+    fetch(
+      `https://api.crimemap.hopto.org/get/incidents?filter=(latitude >= ${tmpMap[0].lat()} AND latitude <= ${tmpMap[13].lat()} AND longitude >= ${tmpMap[0].lng()} AND longitude <= ${tmpMap[13].lng()})&token=${token}`
+      // `https://api.crimemap.hopto.org/get/incidents?filter=(latitude >= ${stepsArray[0].lat} AND latitude <= ${stepsArray[13].lat} AND longitude >= ${stepsArray[0].lng} AND longitude <= ${stepsArray[13].lng})&token=${token}`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+    for (let i = 0; i < tmpMap.length; i++) {
+      // fetch(
+      //   `https://crimemap.hopto.org/get/incidents?filter=(latitude >= ${tmpMap[
+      //     i
+      //   ].lat()} AND latitude <= ${tmpMap[i].lng()} AND longitude >= ${tmpMap[
+      //     i + 1
+      //   ].lat()} AND longitude <= ${tmpMap[i].lng()})`
+      // )
+      //   .then((response) => response.json())
+      //   .then((data) => {
+      //     console.log(data);
+      //   })
+      //   .catch((error) => {
+      //     console.error("Error:", error);
+      //   });
+    }
+  };
+
   // Set up another useEffect hook to run whenever the start state variable changes
   useEffect(() => {
-    console.log(start);
-    async function fetchData() {}
+    console.log("start", start);
     // console.log(end);
   }, [start]);
 
-// Render the component
+  // Render the component
   return (
     // Load the Google Maps API with the provided API key
     <LoadScript googleMapsApiKey="AIzaSyCB4V63QJ8uz0HDmMrr_KUkuz85VcbZEZU">
@@ -136,36 +218,42 @@ export default function DirectionMap() {
                     setDirections(response);
                     console.log(response);
                     console.log(response.routes[0].overview_path[0]);
-                    const tmpMap = response.routes[0].overview_path.map((d, index) => {
-                      if (
-                        response.routes[0].overview_path.length ===
-                        index + 1
-                      ) {
-                        
-                      } else {
-                        // setEnd({
-                        //   lat: d[
-                        //     index + 1
-                        //   ].lat(),
-                        //   lng: d[
-                        //     index + 1
-                        //   ].lng(),
-                        // });
-                        console.log(d.lat())
-                        setStart({
-                          lat: d.lat(),
-                          lng: d.lng(),
-                        });
-                       }
-                    });
-                    // getStart({
-                    //   lat: response.routes[0].overview_path[0].lat(),
-                    //   lng: response.routes[0].overview_path[0].lng(),
-                    // });
-                    // getEnd({
-                    //   lat: response.routes[0].overview_path[1].lat(),
-                    //   lng: response.routes[0].overview_path[1].lng(),
-                    // });
+                    calculateSteps(response);
+
+                    //         const tmpMap = response.routes[0].overview_path.map(
+                    //           (d, index) => {
+                    //             if (
+                    //               response.routes[0].overview_path.length ===
+                    //               index + 1
+                    //             ) {
+                    //             } else {
+                    //               // setEnd({
+                    //               //   lat: d[
+                    //               //     index + 1
+                    //               //   ].lat(),
+                    //               //   lng: d[
+                    //               //     index + 1
+                    //               //   ].lng(),
+                    //               // });
+                    //               //console.log(d.lat())
+                    //               setStart({
+                    //                 lat: d.lat(),
+                    //                 lng: d.lng(),
+                    //               });
+                    //               //console.log(d.lat())
+                    //               // console.log('jaf;jf;da', start)
+                    //             }
+                    //           }
+                    //         );
+                    //         // getStart({
+                    //         //   lat: response.routes[0].overview_path[0].lat(),
+                    //         //   lng: response.routes[0].overview_path[0].lng(),
+                    //         // });
+                    //         // getEnd({
+                    //         //   lat: response.routes[0].overview_path[1].lat(),
+                    //         //   lng: response.routes[0].overview_path[1].lng(),
+                    //         // });
+
                     setButtonPushed(false);
                   }
                 }}
