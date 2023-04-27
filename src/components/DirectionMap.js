@@ -43,6 +43,8 @@ export default function DirectionMap() {
   const [lat2, setLat2] = useState();
   const [long2, setLong2] = useState();
 
+ 
+
   const [token, setToken] = useState(
     "IVBDcEovRGtzL0RhOUdrUFdjaDZuQ0E9PT9nQVdWRVFBQUFBQUFBQUNNQjNWelpYSmZhV1NVakFFeGxJYVVMZz09"
   );
@@ -92,78 +94,57 @@ export default function DirectionMap() {
   const calculateSteps = (i) => {
     console.log(i);
     const tmpMap = i.routes[0].overview_path.map((d, index) => {
-      // if (i.routes[0].overview_path.length === index + 1) {
-      //   return;
-      // } else {
-        return d;
-        // setEnd({
-        //   lat: d[index + 1].lat(),
-        //   lng: d[index + 1].lng(),
-        // });
-        console.log("starter", d.lng());
-        // console.log('starter',start);
-        //   setStart({
-        //     lat: d.lat(),
-        //     lng: d[index].lng(),
-        // });
-        console.log("starter", start);
-        console.log("ender", end);
-        // console.log('jaf;jf;da', start)
-      // }
+      return d;
     });
-
 
     const stepsArray = [];
 
-          i.routes[0].legs.forEach((leg) => {
-            leg.steps.forEach((step) => {
-              const polyline = step.path;
-              polyline.forEach((point) => {
-                stepsArray.push({ lat: point.lat(), lng: point.lng() });
-              });
-            });
-          }); 
+    i.routes[0].legs.forEach((leg) => {
+      leg.steps.forEach((step) => {
+        const polyline = step.path;
+        polyline.forEach((point) => {
+          stepsArray.push({ lat: point.lat(), lng: point.lng() });
+        });
+      });
+    });
+    const stepsArray_2 = [];
+    i.routes[1].legs.forEach((leg) => {
+      leg.steps.forEach((step) => {
+        const polyline = step.path;
+        polyline.forEach((point) => {
+          stepsArray_2.push({ lat: point.lat(), lng: point.lng() });
+        });
+      });
+    });
 
-console.log('gjgjg', stepsArray);
+    console.log("gjgjg", stepsArray[0].lat);
 
-    
-
-
-    setStart(...tmpMap)
+    setStart(...tmpMap);
     console.log(tmpMap);
 
     console.log(tmpMap[0].lat());
     console.log(tmpMap[0].lng());
     console.log(tmpMap[5].lat());
     console.log(tmpMap[5].lng());
-    console.log(tmpMap.length)
-    console.log(start)
-    fetch(
-      `https://api.crimemap.hopto.org/get/incidents?filter=(latitude >= ${tmpMap[0].lat()} AND latitude <= ${tmpMap[13].lat()} AND longitude >= ${tmpMap[0].lng()} AND longitude <= ${tmpMap[13].lng()})&token=${token}`
-      // `https://api.crimemap.hopto.org/get/incidents?filter=(latitude >= ${stepsArray[0].lat} AND latitude <= ${stepsArray[13].lat} AND longitude >= ${stepsArray[0].lng} AND longitude <= ${stepsArray[13].lng})&token=${token}`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-    for (let i = 0; i < tmpMap.length; i++) {
-      // fetch(
-      //   `https://crimemap.hopto.org/get/incidents?filter=(latitude >= ${tmpMap[
-      //     i
-      //   ].lat()} AND latitude <= ${tmpMap[i].lng()} AND longitude >= ${tmpMap[
-      //     i + 1
-      //   ].lat()} AND longitude <= ${tmpMap[i].lng()})`
-      // )
-      //   .then((response) => response.json())
-      //   .then((data) => {
-      //     console.log(data);
-      //   })
-      //   .catch((error) => {
-      //     console.error("Error:", error);
-      //   });
+    console.log("1 array", tmpMap.length);
+    console.log("steps", stepsArray.length);
+    console.log(start);
+
+    for (let i = 0; i < stepsArray.length; i++) {
+      fetch(
+        `https://api.crimemap.hopto.org/get/incidents?filter=(latitude >= ${
+          stepsArray[i].lat
+        } AND latitude <= ${stepsArray[i].lat + 0.0002} AND longitude >= ${
+          stepsArray[i].lng
+        } AND longitude <= ${stepsArray[i].lng + 0.0002})&token=${token}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
     }
   };
 
@@ -220,40 +201,6 @@ console.log('gjgjg', stepsArray);
                     console.log(response.routes[0].overview_path[0]);
                     calculateSteps(response);
 
-                    //         const tmpMap = response.routes[0].overview_path.map(
-                    //           (d, index) => {
-                    //             if (
-                    //               response.routes[0].overview_path.length ===
-                    //               index + 1
-                    //             ) {
-                    //             } else {
-                    //               // setEnd({
-                    //               //   lat: d[
-                    //               //     index + 1
-                    //               //   ].lat(),
-                    //               //   lng: d[
-                    //               //     index + 1
-                    //               //   ].lng(),
-                    //               // });
-                    //               //console.log(d.lat())
-                    //               setStart({
-                    //                 lat: d.lat(),
-                    //                 lng: d.lng(),
-                    //               });
-                    //               //console.log(d.lat())
-                    //               // console.log('jaf;jf;da', start)
-                    //             }
-                    //           }
-                    //         );
-                    //         // getStart({
-                    //         //   lat: response.routes[0].overview_path[0].lat(),
-                    //         //   lng: response.routes[0].overview_path[0].lng(),
-                    //         // });
-                    //         // getEnd({
-                    //         //   lat: response.routes[0].overview_path[1].lat(),
-                    //         //   lng: response.routes[0].overview_path[1].lng(),
-                    //         // });
-
                     setButtonPushed(false);
                   }
                 }}
@@ -269,7 +216,7 @@ console.log('gjgjg', stepsArray);
                   options={{ directions: directions, routeIndex: 1 }}
                 />
                 <DirectionsRenderer
-                  options={{ directions: directions, routeIndex: 2 }}
+                // options={{ directions: directions, routeIndex: 2 }}
                 />
               </>
             )}
