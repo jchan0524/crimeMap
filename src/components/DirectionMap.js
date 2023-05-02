@@ -36,14 +36,15 @@ export default function DirectionMap() {
   const [origin, setOrigin] = useState(null);
   const [buttonPushed, setButtonPushed] = useState(false);
   const [start, setStart] = useState([]);
-  const [end, setEnd] = useState({});
+  const [steps, setSteps] = useState();
 
   const [lat, setLat] = useState();
   const [long, setLong] = useState();
   const [lat2, setLat2] = useState();
   const [long2, setLong2] = useState();
 
- 
+  const [count, setCount] = useState(0);
+  const [count2, setCount2] = useState(0);
 
   const [token, setToken] = useState(
     "IVBDcEovRGtzL0RhOUdrUFdjaDZuQ0E9PT9nQVdWRVFBQUFBQUFBQUNNQjNWelpYSmZhV1NVakFFeGxJYVVMZz09"
@@ -93,9 +94,6 @@ export default function DirectionMap() {
 
   const calculateSteps = (i) => {
     console.log(i);
-    const tmpMap = i.routes[0].overview_path.map((d, index) => {
-      return d;
-    });
 
     const stepsArray = [];
 
@@ -108,6 +106,7 @@ export default function DirectionMap() {
       });
     });
     const stepsArray_2 = [];
+
     i.routes[1].legs.forEach((leg) => {
       leg.steps.forEach((step) => {
         const polyline = step.path;
@@ -116,19 +115,12 @@ export default function DirectionMap() {
         });
       });
     });
-
-    console.log("gjgjg", stepsArray[0].lat);
-
-    setStart(...tmpMap);
-    console.log(tmpMap);
-
-    console.log(tmpMap[0].lat());
-    console.log(tmpMap[0].lng());
-    console.log(tmpMap[5].lat());
-    console.log(tmpMap[5].lng());
-    console.log("1 array", tmpMap.length);
-    console.log("steps", stepsArray.length);
-    console.log(start);
+    // const myArray = ['apple', 'banana', 'cherry'];
+    // for (let b = 0; b < myArray.length; b++) {
+    //   window["item_" + b] = i[b];
+    //   console.log(item_0)
+    // }
+    
 
     for (let i = 0; i < stepsArray.length; i++) {
       fetch(
@@ -141,6 +133,25 @@ export default function DirectionMap() {
         .then((response) => response.json())
         .then((data) => {
           console.log(data);
+          calculateScore(data);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }
+
+    for (let i = 0; i < stepsArray_2.length; i++) {
+      fetch(
+        `https://api.crimemap.hopto.org/get/incidents?filter=(latitude >= ${
+          stepsArray_2[i].lat
+        } AND latitude <= ${stepsArray_2[i].lat + 0.0002} AND longitude >= ${
+          stepsArray_2[i].lng
+        } AND longitude <= ${stepsArray_2[i].lng + 0.0002})&token=${token}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          calculateScore2(data);
         })
         .catch((error) => {
           console.error("Error:", error);
@@ -148,11 +159,47 @@ export default function DirectionMap() {
     }
   };
 
+  const calculateScore = useCallback((response) => {
+    setCount((prevCount) => {
+      let tmpCount = prevCount;
+     
+      if (!response.data.submitted) {
+        if (Array.isArray(response.data)) {
+          for (let j = 0; j < response.data.length; j++) {
+            tmpCount += response.data[j].tier * 10;
+          }
+        } else {
+          tmpCount += response.data.tier * 10;
+        }
+      }
+     
+      return tmpCount;
+    });
+  }, []);
+
+  const calculateScore2 = useCallback((response) => {
+    setCount2((prevCount2) => {
+      let tmpCount2 = prevCount2;
+   
+      if (!response.data.submitted) {
+        if (Array.isArray(response.data)) {
+          for (let j = 0; j < response.data.length; j++) {
+            tmpCount2 += response.data[j].tier * 10;
+          }
+        } else {
+          tmpCount2 += response.data.tier * 10;
+        }
+      }
+  
+      return tmpCount2;
+    });
+  }, []);
+
   // Set up another useEffect hook to run whenever the start state variable changes
   useEffect(() => {
-    console.log("start", start);
-    // console.log(end);
-  }, [start]);
+    console.log("start", count);
+    console.log("start 2", count2);
+  }, [count, count2]);
 
   // Render the component
   return (
@@ -197,8 +244,8 @@ export default function DirectionMap() {
                 callback={(response) => {
                   if (response !== null) {
                     setDirections(response);
-                    console.log(response);
-                    console.log(response.routes[0].overview_path[0]);
+                    
+                  
                     calculateSteps(response);
 
                     setButtonPushed(false);
@@ -209,14 +256,17 @@ export default function DirectionMap() {
 
             {directions && (
               <>
-                <DirectionsRenderer
-                  options={{ directions: directions, routeIndex: 0 }}
-                />
+                {/* <DirectionsRenderer
+                  options={{ directions: directions, routeIndex: selected }}
+                /> */}
                 <DirectionsRenderer
                   options={{ directions: directions, routeIndex: 1 }}
                 />
                 <DirectionsRenderer
-                // options={{ directions: directions, routeIndex: 2 }}
+                  options={{ directions: directions, routeIndex: 2 }}
+                />
+                <DirectionsRenderer
+                  options={{ directions: directions, routeIndex: 0 }}
                 />
               </>
             )}
