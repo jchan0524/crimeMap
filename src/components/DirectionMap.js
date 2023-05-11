@@ -131,7 +131,7 @@ export default function DirectionMap() {
         leg.steps.forEach((step) => {
           const polyline = step.path;
           polyline.forEach((point) => {
-            stepsArray.push({ lat: point.lat(), lng: point.lng() });
+            stepsArray_3.push({ lat: point.lat(), lng: point.lng() });
           });
         });
       });
@@ -189,7 +189,7 @@ export default function DirectionMap() {
       })
       .catch((error) => console.error("Error:", error));
 
-    const fetches_3 = stepsArray.map((step) => {
+    const fetches_3 = stepsArray_3.map((step) => {
       return fetch(
         `https://api.crimemap.hopto.org/get/incidents?filter=(latitude >= ${
           step.lat
