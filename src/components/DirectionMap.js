@@ -25,7 +25,7 @@ import {
 // Define a container style for the map and a center location
 const containerStyle = {
   width: "100%",
-  height: "400px",
+  height: "500px",
 };
 
 const center = {
@@ -44,6 +44,8 @@ export default function DirectionMap() {
   const [destinationInput, SetDestinationInput] = useState("");
   const [origin, setOrigin] = useState(null);
   const [buttonPushed, setButtonPushed] = useState(false);
+  const [colorAssignments, setColorAssignments] = useState(["red", "red", "red"]);
+
 
   const [count, setCount] = useState(0);
   const [count2, setCount2] = useState(0);
@@ -84,6 +86,9 @@ export default function DirectionMap() {
     setLoading(true);
     // Set the buttonPushed state variable to true
     setButtonPushed(true);
+    // setCount(0);
+    // setCount2(0);
+    // setCount3(0);
     // Geocode the origin and destination locations using the Geocode library
     const originResponse = await Geocode.fromAddress(originInput);
     const destinationResponse = await Geocode.fromAddress(destinationInput);
@@ -275,54 +280,94 @@ export default function DirectionMap() {
   useEffect(() => {
     console.log("start", count);
     console.log("start 2", count2);
-  }, [count, count2]);
+    console.log("start 3", count3);
+  }, [count, count2, count3]);
 
-  function getColorsFromColorCounts(
-    route1CrimeCount,
-    route2CrimeCount,
-    route3CrimeCount
-  ) {
-    const colors = ["green", "yellow", "red"];
-    const colorAssignments = Array(3).fill(null);
+  
 
-    if (
-      route1CrimeCount <= route2CrimeCount &&
-      route1CrimeCount <= route3CrimeCount
-    ) {
-      colorAssignments[0] = colors[0];
-      if (route2CrimeCount <= route3CrimeCount) {
-        colorAssignments[1] = colors[1];
-        colorAssignments[2] = colors[2];
-      } else {
-        colorAssignments[1] = colors[2];
-        colorAssignments[2] = colors[1];
-      }
-    } else if (
-      route2CrimeCount <= route1CrimeCount &&
-      route2CrimeCount <= route3CrimeCount
-    ) {
-      colorAssignments[0] = colors[1];
-      colorAssignments[1] = colors[0];
-      if (route1CrimeCount <= route3CrimeCount) {
-        colorAssignments[2] = colors[2];
-      } else {
-        colorAssignments[2] = colors[1];
-      }
-    } else {
-      colorAssignments[0] = colors[2];
-      if (route1CrimeCount <= route2CrimeCount) {
-        colorAssignments[1] = colors[1];
-        colorAssignments[2] = colors[0];
-      } else {
-        colorAssignments[1] = colors[0];
-        colorAssignments[2] = colors[1];
-      }
-    }
+//   function getColorsFromColorCounts(route1CrimeCount, route2CrimeCount, route3CrimeCount) {
+//     const colors = ["green", "yellow", "red"];
+//     let colorAssignments = Array(3).fill("red");  // Assume all routes are "red" to start
 
-    return colorAssignments;
+//     const routes = [route1CrimeCount, route2CrimeCount, route3CrimeCount]
+//         .map((route, i) => ({ index: i, count: route }))
+//         .filter(route => route.count !== null && route.count !== undefined);  // Exclude routes with no count
+
+//     if (routes.length === 1) {
+//         colorAssignments[routes[0].index] = "green";  // If there's only one route, it's "green"
+//     } else {
+//         routes.sort((a, b) => a.count - b.count);  // Sort routes by count
+//         for(let i = 0; i < routes.length; i++) {
+//             colorAssignments[routes[i].index] = colors[i];  // Assign colors based on sorted order
+//         }
+//     }
+
+//     return colorAssignments;
+// }
+
+// function getColorsFromColorCounts(route1CrimeCount, route2CrimeCount, route3CrimeCount) {
+//   const colorsTwo = ["green", "red"];  // Define colors array for two routes
+//   const colorsThree = ["green", "yellow", "red"];  // Define colors array for three routes
+//   let colorAssignments = Array(3).fill("red");  // Assume all routes are "red" to start
+
+//   const routes = [route1CrimeCount, route2CrimeCount, route3CrimeCount]
+//       .map((route, i) => ({ index: i, count: route }))
+//       .filter(route => route.count !== null && route.count !== undefined);  // Exclude routes with no count
+
+//   routes.sort((a, b) => a.count - b.count);  // Sort routes by count
+
+//   if (routes.length === 1) {
+//       colorAssignments[routes[0].index] = "green";  // If there's only one route, it's "green"
+//   } else if (routes.length === 2) {
+//       for(let i = 0; i < routes.length; i++) {
+//         colorAssignments[routes[i].index] = colorsTwo[i];  // Assign colors based on sorted order
+//       }
+//   } else {
+//       for(let i = 0; i < routes.length; i++) {
+//         colorAssignments[routes[i].index] = colorsThree[i];  // Assign colors based on sorted order
+//       }
+//   }
+
+//   return colorAssignments;
+// }
+
+function getColorsFromColorCounts(route1CrimeCount, route2CrimeCount, route3CrimeCount) {
+  const colorsTwo = ["green", "red"];  // Define colors array for two routes, reversed
+  // const colorsThree = ["green", "yellow", "red"];  // Define colors array for three routes, reversed
+  const colorsThree = ["green", "yellow", "red"];
+  let colorAssignments = Array(3).fill("red");  // Assume all routes are "red" to start
+
+  const routes = [route1CrimeCount, route2CrimeCount, route3CrimeCount]
+      .map((route, i) => ({ index: i, count: route }))
+      .filter(route => route.count !== null && route.count !== undefined);  // Exclude routes with no count
+
+  routes.sort((a, b) => a.count - b.count);  // Sort routes by count
+
+  if (routes.length === 1) {
+      colorAssignments[routes[0].index] = "green";  // If there's only one route, it's "green"
+  } else if (routes.length === 2) {
+      for(let i = 0; i < routes.length; i++) {
+        colorAssignments[routes[i].index] = colorsTwo[i];  // Assign colors based on sorted order
+      }
+  } else {
+      for(let i = 0; i < routes.length; i++) {
+        colorAssignments[routes[i].index] = colorsThree[i];  // Assign colors based on sorted order
+      }
   }
 
-  const colorAssignments = getColorsFromColorCounts(count, count2, count3);
+  return colorAssignments;
+}
+
+
+
+
+
+
+
+
+
+
+  // const colorAssignments = getColorsFromColorCounts(count, count2, count3);
 
   // Render the component
   return (
@@ -377,6 +422,8 @@ export default function DirectionMap() {
 
                       calculateSteps(response);
 
+                      setColorAssignments(getColorsFromColorCounts(count, count2, count3));
+
                       setButtonPushed(false);
                     }
                   }}
@@ -425,28 +472,34 @@ export default function DirectionMap() {
           <Form>
             <Row className="mb-3">
               <Col>
+              <Form.Label>Route 1 Score: </Form.Label>
                 <Form.Control
                   placeholder="Route 1 Score: "
                   value={count}
                   readOnly
                 />
+                <span>Color: {colorAssignments[0]}</span>
               </Col>
               {directions && directions.routes[1] && (
                 <Col>
+                 <Form.Label>Route 2 Score:</Form.Label>
                   <Form.Control
                     placeholder="Route 2 Score: "
                     value={count2}
                     readOnly
                   />
+                  <span>Color: {colorAssignments[1]}</span>
                 </Col>
               )}
               {directions && directions.routes[2] && (
                 <Col>
+                 <Form.Label htmlFor="disabledSelect">Route 3 Scores: </Form.Label>
                   <Form.Control
                     placeholder="Route 3 Score: "
                     value={count3}
                     readOnly
                   />
+                  <span>Color: {colorAssignments[2]}</span>
                 </Col>
               )}
             </Row>

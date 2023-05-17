@@ -15,23 +15,13 @@ import { Button, Offcanvas } from "react-bootstrap";
 
 // Set the container size and center coordinates for the Google Map
 const containerStyle = {
-  width: "500px",
+  width: "100%",
   height: "750px",
 };
 
 const center = {
   lat: 39.677956,
   lng: -75.7509,
-};
-// Set the origin and destination coordinates for the DirectionsService
-const origin = {
-  lat: 39.68363,
-  lng: -75.74546,
-};
-
-const destination = {
-  lat: 39.66671,
-  lng: -75.77605,
 };
 
 export default function Map(props) {
